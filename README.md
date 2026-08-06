@@ -61,7 +61,7 @@ print(sample_distribution(qc, shots=4096, seed=42))
 | M1 - Çekirdek | tamam | Qubit, H/X/Z, CNOT, ölçüm, Bell/GHZ |
 | M2 - 7 Kübit | tamam | n kübit destekli devre + dağılım örnekleme |
 | M3 - Doğrulama | kısmen | Bağımsız doğrulama testleri tamam (23). Qiskit-Statevector karşılaştırması laptop'ta: `pip install qiskit && python docs/qiskit_compare.py` |
-| M3b - Gerçek Rastgelelik | - | ANU QRNG entegrasyonu (Lab rastgelelik motoru) |
+| M3b - Gerçek Rastgelelik | tamam | Lab rastgelelik motoruna gerçek kuantum kaynağı: ANU QRNG (vakum dalgalanması) → NIST Beacon → Web Crypto düşüş zinciri; canlı sitede seçilebilir |
 | M4 - Lansman | - | v1.0, dokümantasyon, duyuru |
 | M5 - Topluluk | - | Katkı rehberi, geri bildirim, TÜBİTAK 2204 |
 
