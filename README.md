@@ -16,13 +16,14 @@ adresindeki Lab'ın kuantum devre simülatörü kodunu barındırır.
 - `QuantumCircuit`: n kübitlik devre, tensör çarpımı ile tam uzayda işlem
 - Bell (`|00> + |11>`) ve GHZ (`|0...0> + |1...1>`) dolanıklık durumları
 - `sample_distribution`: topluluk ölçümü (shots) ile olasılık dağılımı
+- `web/quantro.js`: aynı motorun JavaScript sürümü — sitedeki devre
+  simülatörünün yerine geçmek üzere (bkz. `web/BAGLA.md` bağlama kılavuzu)
 
-## Kurulum
+## Test
 
 ```bash
-python3 -m pip install numpy pytest
-git clone https://github.com/quantro38/quantro.git
-cd quantro
+python3 -m pytest tests/ -q     # Python motoru (24 test)
+node --test tests/test_web.js   # JS motoru (17 test)
 ```
 
 ## Kullanım
@@ -33,10 +34,12 @@ python3 -m quantro bell     # dolanıklık: yalnızca |00> veya |11>
 python3 -m quantro ghz 7    # 7 kübit GHZ
 ```
 
-## Test
+## Kurulum
 
 ```bash
-python3 -m pytest tests/ -q
+python3 -m pip install numpy pytest
+git clone https://github.com/quantro38/quantro.git
+cd quantro
 ```
 
 ## Basit örnek

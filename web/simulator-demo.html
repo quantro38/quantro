@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantro JS Motoru — Demo</title>
+<style>
+  :root{--void:#020810;--cyan:#00c8f0;--text:#e8edf5;--muted:#7a93a8;--green:#00f0a0;--purple:#a060ff;--red:#ff4466}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--void);color:var(--text);font-family:'Courier New',monospace;padding:24px}
+  h1{font-size:20px;color:var(--cyan);margin-bottom:4px;letter-spacing:3px}
+  p.sub{color:var(--muted);font-size:12px;margin-bottom:20px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  label{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  input,select,button{background:var(--void);border:1px solid rgba(0,200,240,.25);color:var(--cyan);
+    font-family:inherit;font-size:13px;padding:8px 12px}
+  button{cursor:pointer}
+  button:hover{background:rgba(0,200,240,.12)}
+  button.primary{background:var(--cyan);color:var(--void);font-weight:700}
+  .panel{border:1px solid rgba(0,200,240,.15);padding:16px;margin-bottom:16px}
+  .lanes{margin-bottom:12px}
+  .lane{display:flex;align-items:center;margin-bottom:8px}
+  .lane .lbl{width:34px;color:var(--muted);font-size:12px}
+  .lane .wire{flex:1;display:flex;gap:6px;flex-wrap:wrap}
+  .gate{border:1px solid var(--cyan);padding:3px 7px;font-size:11px;color:var(--cyan);cursor:pointer}
+  .gate.X{border-color:var(--red);color:var(--red)}
+  .gate.Z{border-color:var(--purple);color:var(--purple)}
+  .bars{display:flex;gap:10px;align-items:flex-end;height:80px}
+  .bar-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .bar{width:100%;background:rgba(0,200,240,.15);min-height:3px}
+  .bar.hot{background:var(--cyan)}
+  .bar-lbl{font-size:10px;color:var(--muted)}
+  .bar-val{font-size:11px;color:var(--cyan)}
+</style>
+</head>
+<body>
+  <h1>QUANTRO JS MOTORU</h1>
+  <p class="sub">quantro.js demo — gerçek durum vektörü simülasyonu (n kübit, CNOT, Bell/GHZ)</p>
+
+  <div class="panel">
+    <div class="row">
+      <label>Kübit</label>
+      <select id="nq">
+        <option>1</option><option selected>2</option><option>3</option>
+        <option>4</option><option>5</option><option>6</option><option>7</option>
+      </select>
+      <button onclick="rebuild()">↻ Devreyi Yenile</button>
+      <button class="primary" onclick="measure()">⟨ψ| Ölç (1024)</button>
+      <button onclick="bell()">Bell |00>+|11></button>
+      <button onclick="ghz()">GHZ (tümü)</button>
+      <button onclick="clearAll()">Sıfırla</button>
+    </div>
+    <div class="row" id="gatebar" style="display:none">
+      <label>Kapılar</label>
+      <button onclick="addGate(0,'H')">H q0</button>
+      <button onclick="addGate(0,'X')">X q0</button>
+      <button onclick="addGate(0,'Z')">Z q0</button>
+      <button onclick="addGate(1,'H')">H q1</button>
+      <button onclick="addGate(1,'X')">X q1</button>
+      <button onclick="addGate(1,'Z')">Z q1</button>
+      <button onclick="addGate(0,'CNOT')">CNOT q0→q1</button>
+    </div>
+    <div class="lanes" id="lanes"></div>
+  </div>
+
+  <div class="panel" id="result" style="display:none">
+    <div style="color:var(--muted);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Ölçüm Dağılımı (1024 atış)</div>
+    <div class="bars" id="bars"></div>
+  </div>
+
+  <script src="quantro.js"></script>
+  <script>
+    let nq = 2;
+    let circ = [];   // circ[q] = [{g:'H'|'X'|'Z'|'CNOT', t:hedef}]
+
+    function rebuild() {
+      nq = parseInt(document.getElementById('nq').value);
+      circ = Array.from({length:nq}, () => []);
+      document.getElementById('gatebar').style.display = nq >= 2 ? 'flex' : 'none';
+      document.getElementById('result').style.display = 'none';
+      render();
+    }
+
+    function addGate(q, g) {
+      circ[q].push(g === 'CNOT' ? { g: 'CNOT', t: 1 } : { g: g, t: q });
+      render();
+    }
+
+    function removeGate(q, i) {
+      circ[q].splice(i, 1);
+      render();
+    }
+
+    function clearAll() {
+      circ = Array.from({length:nq}, () => []);
+      document.getElementById('result').style.display = 'none';
+      render();
+    }
+
+    function render() {
+      const lanes = document.getElementById('lanes');
+      lanes.innerHTML = '';
+      for (let q = 0; q < nq; q++) {
+        const lane = document.createElement('div');
+        lane.className = 'lane';
+        const lbl = document.createElement('span');
+        lbl.className = 'lbl';
+        lbl.textContent = 'q' + q;
+        const wire = document.createElement('div');
+        wire.className = 'wire';
+        circ[q].forEach((gate, i) => {
+          const el = document.createElement('span');
+          el.className = 'gate ' + gate.g;
+          el.textContent = gate.g === 'CNOT' ? 'CNOT→' + gate.t : gate.g;
+          el.title = 'Tıkla: kaldır';
+          el.onclick = () => removeGate(q, i);
+          wire.appendChild(el);
+        });
+        lane.appendChild(lbl);
+        lane.appendChild(wire);
+        lanes.appendChild(lane);
+      }
+    }
+
+    function applyCircuit() {
+      const qc = new Quantro.QuantumCircuit(nq);
+      for (let q = 0; q < nq; q++) {
+        for (const gate of circ[q]) {
+          if (gate.g === 'H') qc.h(gate.t);
+          else if (gate.g === 'X') qc.x(gate.t);
+          else if (gate.g === 'Z') qc.z(gate.t);
+          else if (gate.g === 'CNOT') qc.cx(q, gate.t);
+        }
+      }
+      return qc;
+    }
+
+    function measure() {
+      renderBars(Quantro.sampleDistribution(applyCircuit(), 1024, Date.now() >>> 0));
+    }
+
+    function bell() {
+      circ = Array.from({length:nq}, () => []);
+      circ[0].push({ g: 'H', t: 0 });
+      if (nq >= 2) circ[0].push({ g: 'CNOT', t: 1 });
+      render();
+      measure();
+    }
+
+    function ghz() {
+      circ = Array.from({length:nq}, () => []);
+      circ[0].push({ g: 'H', t: 0 });
+      for (let q = 1; q < nq; q++) circ[0].push({ g: 'CNOT', t: q });
+      render();
+      measure();
+    }
+
+    function renderBars(counts) {
+      const el = document.getElementById('result');
+      el.style.display = 'block';
+      const total = Math.pow(2, nq);
+      let max = 0;
+      for (let k = 0; k < total; k++) max = Math.max(max, counts[k] || 0);
+      const bars = document.getElementById('bars');
+      bars.innerHTML = '';
+      for (let k = 0; k < total; k++) {
+        const bits = k.toString(2).padStart(nq, '0');
+        const v = counts[k] || 0;
+        const w = document.createElement('div');
+        w.className = 'bar-w';
+        const bar = document.createElement('div');
+        bar.className = 'bar' + (v === max && v > 0 ? ' hot' : '');
+        bar.style.height = (max > 0 ? Math.round(v / max * 64) : 3) + 'px';
+        const val = document.createElement('div');
+        val.className = 'bar-val';
+        val.textContent = v;
+        const lbl = document.createElement('div');
+        lbl.className = 'bar-lbl';
+        lbl.textContent = '|' + bits.split('').join('') + '>';
+        w.appendChild(bar);
+        w.appendChild(val);
+        w.appendChild(lbl);
+        bars.appendChild(w);
+      }
+    }
+
+    rebuild();
+  </script>
+</body>
+</html>
