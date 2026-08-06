@@ -304,12 +304,18 @@ footer{background:var(--deep);border-top:1px solid rgba(0,200,240,.07);padding:3
       <div class="qrng-ctrl">
         <span class="qlbl">Min</span><input class="qin" id="qmin" type="number" value="1">
         <span class="qlbl">Max</span><input class="qin" id="qmax" type="number" value="1000000">
+        <span class="qlbl">Kaynak</span>
+        <select class="qin" id="qsrc" style="width:auto">
+          <option value="quantum" selected>⚛ Gerçek Kuantum (ANU)</option>
+          <option value="sim">◌ Simüle (Web Crypto)</option>
+        </select>
         <button class="btn btn-p" onclick="genQ()">⚛ Üret</button>
         <button class="btn btn-g" onclick="genQS()">10x Seri</button>
         <button class="btn btn-r" onclick="clearQ()">Temizle</button>
+        <span class="qlbl" id="qstat" style="color:var(--muted)">…</span>
       </div>
       <div class="qhist" id="qh"></div>
-      <div class="explain"><p><strong>Nasıl çalışır?</strong> Klasik bilgisayarlar algoritma tabanlı sahte rastgelelik üretir. Bu motor Web Crypto API ile kuantum <strong>süperpozisyon</strong> ve <strong>dalga fonksiyonu çöküşü</strong> prensibini modelleyerek her ölçümde gerçek belirsizlik uygular. Heisenberg: <strong>Δx · Δp ≥ ℏ/2</strong></p></div>
+      <div class="explain"><p><strong>Nasıl çalışır?</strong> Klasik bilgisayarlar algoritma tabanlı sahte rastgelelik üretir. Quantro, Avustralya Ulusal Üniversitesi'nin (ANU) gerçek kuantum rastgelelik motoruna bağlanır: lazerler, vakumun kuantum <strong>dalgalanmalarını</strong> ölçerek gerçek belirsizlik üretir. API erişilemezse Web Crypto simülasyonuna düşer. Heisenberg: <strong>Δx · Δp ≥ ℏ/2</strong></p></div>
     </div>
   </div>
 
@@ -690,21 +696,75 @@ function tog(n){
 /* ══ T1: QRNG ══ */
 let qh=[];
 function qRNG(mn,mx){const b=new Uint32Array(4);crypto.getRandomValues(b);let v=0;for(let i=0;i<4;i++)v^=b[i];return mn+Math.abs(v)%(mx-mn+1)}
-function genQ(){
+const ANU_URL='https://qrng.anu.edu.au/API/jsonI.php';
+const NIST_URL='https://beacon.nist.gov/beacon/2.0/pulse/last';
+function qStat(msg,cls){const el=document.getElementById('qstat');if(el){el.textContent=msg;el.style.color=cls||'var(--muted)'}}
+function qSource(){const s=document.getElementById('qsrc');return s?s.value:'quantum'}
+async function qQuantum(mn,mx){
+  const span=mx-mn+1;
+  const srcs=[
+    {fetch:async()=>{
+      const r=await fetch(ANU_URL+'?length=8&type=uint8');
+      if(!r.ok)throw new Error('http');
+      const j=await r.json();
+      if(!j.success||!Array.isArray(j.data)||j.data.length<6)throw new Error('bad');
+      let b=0;for(let k=0;k<6;k++)b=b*256+j.data[k];
+      return {b,label:'⚛ ANU — gerçek kuantum (vakum dalgalanması)',cls:'var(--green)'};
+    }},
+    {fetch:async()=>{
+      const r=await fetch(NIST_URL);
+      if(!r.ok)throw new Error('http');
+      const j=await r.json();
+      const hex=j.pulse&&j.pulse.outputValue;
+      const bytes=String(hex).match(/[0-9a-f]{2}/gi).map(x=>parseInt(x,16));
+      let b=0;for(let k=0;k<6;k++)b=b*256+bytes[k];
+      return {b,label:'◇ NIST Beacon — kriptografik rastgele (kuantum değil)',cls:'var(--gold)'};
+    }}
+  ];
+  for(const s of srcs){
+    try{const o=await s.fetch();return {v:mn+(o.b%span),label:o.label,cls:o.cls}}
+    catch(e){}
+  }
+  return {v:null,label:'',cls:''};
+}
+async function genQ(){
   const mn=parseInt(document.getElementById('qmin').value)||1;
   const mx=parseInt(document.getElementById('qmax').value)||1000000;
   if(mn>=mx)return;
   const el=document.getElementById('qn');
   let c=0;const iv=setInterval(()=>{el.textContent=qRNG(mn,mx).toLocaleString('tr-TR');if(++c>10)clearInterval(iv)},60);
-  setTimeout(()=>{const f=qRNG(mn,mx);el.textContent=f.toLocaleString('tr-TR');addQH(f)},700);
+  await new Promise(r=>setTimeout(r,720));
+  let f=null;
+  if(qSource()==='quantum'){
+    const o=await qQuantum(mn,mx);
+    if(o.v!==null){f=o.v;qStat(o.label,o.cls)}
+    else{qStat('◌ Dış API yok — simüle (Web Crypto)','var(--gold)')}
+  }
+  if(f===null)f=qRNG(mn,mx);
+  el.textContent=f.toLocaleString('tr-TR');
+  addQH(f);
 }
-function genQS(){
+async function genQS(){
   const mn=parseInt(document.getElementById('qmin').value)||1;
   const mx=parseInt(document.getElementById('qmax').value)||1000000;
-  for(let i=0;i<10;i++)setTimeout(()=>{const n=qRNG(mn,mx);document.getElementById('qn').textContent=n.toLocaleString('tr-TR');addQH(n)},i*120);
+  if(mn>=mx)return;
+  const quant=qSource()==='quantum';
+  let lastLabel='';
+  for(let i=0;i<10;i++){
+    let n;
+    if(quant){
+      const o=await qQuantum(mn,mx);
+      if(o.v!==null){n=o.v;lastLabel=o.label;qStat(o.label,o.cls)}
+      else{n=qRNG(mn,mx);qStat('◌ Dış API yok — simüle (Web Crypto)','var(--gold)')}
+    }else n=qRNG(mn,mx);
+    document.getElementById('qn').textContent=n.toLocaleString('tr-TR');
+    addQH(n);
+  }
 }
 function addQH(n){qh.unshift(n);if(qh.length>12)qh.pop();document.getElementById('qh').innerHTML=qh.map(x=>`<div class="qhi">${x.toLocaleString('tr-TR')}</div>`).join('')}
 function clearQ(){qh=[];document.getElementById('qh').innerHTML='';document.getElementById('qn').textContent='—'}
+function qInit(){fetch(ANU_URL+'?length=2&type=uint8').then(r=>{qStat(r.ok?'⚛ ANU erişilebilir — gerçek kuantum hazır':'◌ ANU kapalı — NIST/Web Crypto devrede','var(--green)')}).catch(()=>qStat('◌ ANU erişilemedi — NIST/Web Crypto devrede','var(--gold)'))}
+setTimeout(qInit,800);
 
 /* ══ T2: CIRCUIT ══ */
 let circ=[[],[]];
