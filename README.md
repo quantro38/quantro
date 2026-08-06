@@ -62,7 +62,7 @@ print(sample_distribution(qc, shots=4096, seed=42))
 | M2 - 7 Kübit | tamam | n kübit destekli devre + dağılım örnekleme |
 | M3 - Doğrulama | kısmen | Bağımsız doğrulama testleri tamam (23). Qiskit-Statevector karşılaştırması laptop'ta: `pip install qiskit && python docs/qiskit_compare.py` |
 | M3b - Gerçek Rastgelelik | tamam | Lab rastgelelik motoruna gerçek kuantum kaynağı: ANU QRNG (vakum dalgalanması) → NIST Beacon → Web Crypto düşüş zinciri; canlı sitede seçilebilir |
-| M4 - Lansman | - | v1.0, dokümantasyon, duyuru |
+| M4 - Lansman | tamam | v1.0.0 sürüm etiketi + `docs/RELEASE_v1.0.0.md` (GitHub release'ini oluşturma kullanıcıda) |
 | M5 - Topluluk | - | Katkı rehberi, geri bildirim, TÜBİTAK 2204 |
 
 ## Lisans
