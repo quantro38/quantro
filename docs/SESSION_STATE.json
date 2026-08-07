@@ -1,0 +1,103 @@
+{
+  "dosya_adi": "SESSION_STATE.json",
+  "amac": "Quantro sohbetinin kaldigi yerden devam edebilmesi icin anlik durum dosyasi. Yeni sohbete: 'docs/SESSION_STATE.json dosyasini oku ve kaldigimiz yerden devam et' deyin.",
+  "olusturma_tarihi": "2026-08-07",
+  "proje": {
+    "ad": "Quantro",
+    "tanim": "Kuantum + astrofizik interaktif lab seti (9 arac). Turkiye'nin ilk interaktif kuantum arac seti.",
+    "repo_yolu": "/root/quantro",
+    "site_dizini": "/root/quantro/site",
+    "github": "https://github.com/quantro38/quantro",
+    "canli_site": "https://quantro-1.vercel.app",
+    "lisans": "Apache 2.0"
+  },
+  "oturum_hedefi": "M5 topluluk paketi + v1.1 yukseltmesi: ANU proxy, ki-kare testi, kuantum isinlanma, TR/EN dil destegi, PWA; ardindan v1.1.1'de Bloch kuresi (9. arac). Tumu tamamlandi.",
+  "milestone_durumlari": {
+    "M0 Kurulum": "tamam",
+    "M1 Cekirdek": "tamam",
+    "M2 7 Kuvit": "tamam",
+    "M3 Dogrulama": "kismen - Qiskit karsilastirmasi laptop'ta: pip install qiskit && python docs/qiskit_compare.py",
+    "M3b Gercek Rastgelelik": "tamam",
+    "M4 Lansman": "tamam (v1.0.0)",
+    "M5 Topluluk": "kismen - CONTRIBUTING, issue sablonlari, geri bildirim linkleri, TUBITAK 2204-B taslagi yazildi; resmi basvuru kullanicida (docs/TUBITAK_2204B_taslak.md)",
+    "v1.1": "tamam (isinlanma, proxy, ki-kare, i18n, PWA, RY+CZ)",
+    "v1.1.1": "tamam (Bloch kuresi, 9. arac)"
+  },
+  "tamamlananlar": [
+    "v1.1.0 + v1.1.1 GitHub release'leri olusturuldu (workflow tag'e gore docs/RELEASE_<tag>.md okuyor)",
+    "9 aracli canli site: https://quantro-1.vercel.app (MD5 birebir dogrulandi)",
+    "ANU proxy: /api/anu (Vercel serverless) - 45sn donen blok onbellegi; gercek kuantum verisi ki-kare testini gecti (chi2=21.44 < 24.996)",
+    "Kuantum isinlanma (T8): kossullu duzeltmeli devre, P(|1>)=0.2983~0.30 (20k atis)",
+    "Bloch kuresi (T9): bagimsiz Canvas 2D (CDN yok, cikrimdisi calisir), theta/phi + presets",
+    "TR/EN i18n: 38 data-i18n ogesi, tek tikla gecis (localStorage 'qlang')",
+    "PWA: manifest.webmanifest + sw.js (API cagrilari atlanir)",
+    "Motor: ry(theta) ve cz(control,target) kapilari (Python quantro/core.py + JS quantro.js)",
+    "JS testleri 20/20 pass (tests/test_web.js); test_core.py'ye RY/CZ/isinlanma testleri eklendi (bu ortamda calistirilamadi)"
+  ],
+  "kalan_isler": [
+    "Qiskit dogrulamasi (M3, laptop'ta): pip install qiskit && python docs/qiskit_compare.py",
+    "Python testleri (laptop'ta): pytest tests/ - bu ortamda numpy/pip yok, eklenen yeni testler hic calistirilmadi",
+    "TUBITAK 2204-B basvurusu (kullanici isi): docs/TUBITAK_2204B_taslak.md",
+    "Sertifika / mini dersler: KULLANICI TAMAMEN REDDETTI - tekrar onerilmemeli",
+    "Token iptali: kullanici bilincli olarak iptal ETMEMEYI secti ('dursunlar') - tekrar hatirlatmayin"
+  ],
+  "cevre_kisitlari": {
+    "numpy_pytest_pip": "KURULU DEGIL (pip indirmeleri takiliyor) -> Python testleri bu cihazda calistirilamaz",
+    "gh_cli": "kurulu degil",
+    "shell_tuzagi": "komut ciktisi zaman asiminda kayboluyor -> ciktiyi dosyaya yonlendir (> /tmp/opencode/x.log) sonra tail ile oku; timeout kullan",
+    "vercel_deploy_hata": "DEGISIKLIK: vercel deploy DAIMA /root/quantro/site icinden calistirilacak. Repo kokunden calistirmak 'quantro' projesine (quantro-sand.vercel.app) gidiyor; o proje simdi 404. Gerekirse geri alinabilir."
+  },
+  "motor_tasarimi": {
+    "quantro_js": "web/quantro.js ve site/quantro.js birebir esit (site -> web kopyalandi). Kapilar: h, x, z, y, cx, ry, cz.",
+    "sample_distribution": "TAMSAYI indeks (0..2^n-1) dondurur, bitstring DEGIL. Kuvit biti: (parseInt(k,10)&1) ile alinir, charAt DEGIL.",
+    "isinlanma_devresi": "ry(2*acos(sqrt(0.7)),0); h(1); cx(1,2); cx(0,1); h(0); cx(1,2); cz(0,2) - kossullu duzeltme devrede, ayri olcum duzeltme satiri YOK"
+  },
+  "kaynak_zinciri": {
+    "sira": "proxy (/api/anu) -> ANU (https://qrng.anu.edu.au/API/jsonI.php) -> NIST Beacon (https://beacon.nist.gov/beacon/2.0/pulse/last) -> Web Crypto",
+    "qstat": "durum satiri kullanilan kaynagi gosterir; qsrc secici: Gercek Kuantum / Simule",
+    "qRandom_api_anahtari": "Yeni ANU servisi anahtar istiyor; qrandom.io CORS'suz; BYU 502; Azure kapali; Drand kriptografik (kuantum degil)",
+    "proxy_cozumu": "ANU 1 istek/dakika limiti: 1024 baytlik blok 45sn tutulur, istekler ofsetle (donerek) servis edilir - asla tukenmez, 1024 baytlik ki-kare istegi de hep cikar"
+  },
+  "testler": {
+    "tests/test_web.js": "20 pass / 0 fail (node ile; burada calisiyor). RY(0.7/0.3), CZ fazi, isinlanma marjinal testi dahil",
+    "tests/test_core.py": "mevcut + RY/CZ/isinlanma esdegeleri eklendi; pytest BU ORTAMDA CALISTIRILAMAZ",
+    "turkce_test_sayilari": "README'de M3 satirinda '23' bagimsiz dogrulama testine isaret eder (test_validation.py)"
+  },
+  "yayin_duzeni": {
+    "release_workflow": ".github/workflows/release.yml - 'v*' tag'i push'landiginda otomatik GitHub Release; body'i docs/RELEASE_<tag>.md'den okuyor (yoksa generate_release_notes)",
+    "sw_cache": "icerik degistiginde site/sw.js icindeki CACHE surumu ('quantro-v1.1.1') artirilmali",
+    "yayinli_releaseler": ["v1.0.0", "v1.1.0", "v1.1.1"]
+  },
+  "kimlik_bilgileri": {
+    "vercel_token": "Sohbet gecmisinde paylasildi; dosyaya YAZILMADI (guvenlik). Kaybolursa https://vercel.com/account/tokens adresinden yenisi uretilebilir. Vercel deploy komutu token gerektiriyor.",
+    "github_pat": "kullanimda olabilir; kullanici iptal etmemeyi secti",
+    "dipnot": "gerekirse token olmadan da kullanici Vercel panelinden manuel deploy edebilir (Git baglantisi var)"
+  },
+  "deploy_komutlari": {
+    "canli_deploy": "cd /root/quantro/site && TOKEN=\"<vercel-token>\" npx -y vercel@latest deploy --prod --token \"<vercel-token>\" --yes > /tmp/opencode/v.log 2>&1",
+    "dogrulama": "curl https://quantro-1.vercel.app/quantro-lab.html | md5sum  ile yerel site/quantro-lab.html karsilastir; /api/anu?length=1024&type=uint8 ki-kare verisi; sw.js CACHE surumu"
+  },
+  "onemli_gecmis": [
+    "Komut degisiklikleri 4b6d25b (M3b), b891449, 80fffbe + 6475660 (M5), dc69abb (duyuru), 87ff9bf (v1.1), 07e47f0 (v1.1.1)",
+    "GitHub Release ilk olarak v1.0.0'da body_path sabitlendi; v1.1.1 oncesi dinamik yapildi"
+  ],
+  "dosyalar": {
+    "site/quantro-lab.html": "ana sayfa (T1..T9, i18n 38 oge, ki-kare, isinlanma, bloch, PWA)",
+    "site/quantro.js": "JS motoru (ry, cz dahil)",
+    "site/api/anu.js": "Vercel serverless ANU proxy",
+    "site/manifest.webmanifest": "PWA manifest",
+    "site/sw.js": "service worker (CACHE surumu v1.1.1)",
+    "site/img/icon.svg": "PWA ikonu",
+    "site/index.html": "landing sayfa (arac sayisi: 9)",
+    "quantro/core.py": "Python cekirdegi (ry, cz eklendi)",
+    "web/quantro.js": "site/quantro.js ile esitlenmis kopya",
+    "tests/test_web.js": "JS testleri (20 pass)",
+    "tests/test_core.py": "Python testleri (ek testler laptop'ta)",
+    ".github/workflows/release.yml": "tag -> otomatik release",
+    ".github/ISSUE_TEMPLATE/": "bug_report.md, feature_request.md",
+    "docs/RELEASE_v1.0.0.md, RELEASE_v1.1.0.md, RELEASE_v1.1.1.md": "surum notlari",
+    "docs/DUYURU_v1.0.0.md": "sosyal medya/okul/TUBITAK e-posta metinleri",
+    "docs/TUBITAK_2204B_taslak.md": "basvuru taslagi",
+    "CONTRIBUTING.md, CODE_OF_CONDUCT.md": "topluluk dosyalari"
+  }
+}
