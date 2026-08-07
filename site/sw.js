@@ -1,4 +1,4 @@
-const CACHE = 'quantro-v1.1.0';
+const CACHE = 'quantro-v1.1.1';
 const APP = ['/', '/quantro-lab.html', '/quantro.js', '/index.html', '/manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
