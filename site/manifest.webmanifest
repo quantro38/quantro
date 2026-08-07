@@ -1,0 +1,15 @@
+{
+  "name": "Quantro Lab — Kuantum + Astrofizik Araç Seti",
+  "short_name": "Quantro",
+  "description": "Türkiye'nin ilk 7 araçlık kuantum ve astrofizik interaktif lab seti. Gerçek kuantum rastgelelik dahil.",
+  "start_url": "/quantro-lab.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020810",
+  "theme_color": "#00c8f0",
+  "lang": "tr",
+  "icons": [
+    { "src": "/img/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

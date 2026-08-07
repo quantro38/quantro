@@ -163,3 +163,30 @@ test("mulberry32 deterministik", () => {
   const b = mulberry32(5);
   for (let i = 0; i < 10; i++) assert.strictEqual(a(), b());
 });
+
+test("RY(θ): |0> → cos(θ/2)|0> + sin(θ/2)|1>", () => {
+  const th = 2 * Math.acos(Math.sqrt(0.7));
+  const qc = new QuantumCircuit(1);
+  qc.ry(th, 0);
+  const p = qc.probabilities();
+  assert.ok(Math.abs(p[0] - 0.7) < 1e-9);
+  assert.ok(Math.abs(p[1] - 0.3) < 1e-9);
+});
+
+test("CZ: |11> fazı -1, diğerleri değişmez", () => {
+  const qc = new QuantumCircuit(2);
+  qc.h(0); qc.h(1); qc.cz(0, 1);
+  const p = qc.probabilities();
+  for (let i = 0; i < 4; i++) assert.ok(Math.abs(p[i] - 0.25) < 1e-9);
+});
+
+test("ışınlanma: koşullu düzeltme sonrası Bob kübiti |ψ>", () => {
+  const qc = new QuantumCircuit(3);
+  qc.ry(2 * Math.acos(Math.sqrt(0.7)), 0);
+  qc.h(1); qc.cx(1, 2); qc.cx(0, 1); qc.h(0);
+  qc.cx(1, 2); qc.cz(0, 2);
+  const counts = sampleDistribution(qc, 20000, 7);
+  let one = 0, tot = 0;
+  for (const k in counts) { tot += counts[k]; if ((parseInt(k, 10) & 1) === 1) one += counts[k]; }
+  assert.ok(Math.abs(one / tot - 0.3) < 0.01);
+});

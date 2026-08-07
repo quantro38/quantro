@@ -104,6 +104,10 @@
   QuantumCircuit.prototype.x = function (q) { return this.applySingle(X, q); };
   QuantumCircuit.prototype.y = function (q) { return this.applySingle(Y, q); };
   QuantumCircuit.prototype.z = function (q) { return this.applySingle(Z, q); };
+  QuantumCircuit.prototype.ry = function (theta, q) {
+    var c0 = Math.cos(theta / 2), s0 = Math.sin(theta / 2);
+    return this.applySingle([[c(c0), c(-s0)], [c(s0), c(c0)]], q);
+  };
   QuantumCircuit.prototype.cx = function (control, target) {
     if (control === target) throw new Error("Kontrol ve hedef aynı olamaz");
     var nxt = [];
@@ -112,6 +116,16 @@
       var bits = this._toBits(i);
       if (bits[control] === 1) bits[target] ^= 1;
       nxt[this._fromBits(bits)] = this.state[i];
+    }
+    this.state = nxt;
+    return this;
+  };
+  QuantumCircuit.prototype.cz = function (control, target) {
+    if (control === target) throw new Error("Kontrol ve hedef aynı olamaz");
+    var nxt = this.state.slice();
+    for (var i = 0; i < this._size; i++) {
+      var bits = this._toBits(i);
+      if (bits[control] === 1 && bits[target] === 1) nxt[i] = cScale(-1, this.state[i]);
     }
     this.state = nxt;
     return this;

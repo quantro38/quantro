@@ -94,3 +94,38 @@ def test_measure_all_reproducible():
     qc = QuantumCircuit(1)
     qc.h(0)
     assert qc.measure_all(random.Random(5)) in (0, 1)
+
+
+def test_ry_creates_superposition():
+    import math
+
+    qc = QuantumCircuit(1)
+    qc.ry(2 * math.acos(math.sqrt(0.7)), 0)
+    p = qc.probabilities()
+    assert abs(p[0] - 0.7) < 1e-9
+    assert abs(p[1] - 0.3) < 1e-9
+
+
+def test_cz_flips_phase_on_11():
+    qc = QuantumCircuit(2)
+    qc.h(0)
+    qc.h(1)
+    qc.cz(0, 1)
+    p = qc.probabilities()
+    assert all(abs(x - 0.25) < 1e-9 for x in p)
+
+
+def test_teleportation_bob_receives_psi():
+    import math
+
+    qc = QuantumCircuit(3)
+    qc.ry(2 * math.acos(math.sqrt(0.7)), 0)
+    qc.h(1)
+    qc.cx(1, 2)
+    qc.cx(0, 1)
+    qc.h(0)
+    qc.cx(1, 2)
+    qc.cz(0, 2)
+    counts = sample_distribution(qc, shots=20000, seed=7)
+    one = sum(c for key, c in counts.items() if key & 1 == 1)
+    assert abs(one / 20000 - 0.3) < 0.01

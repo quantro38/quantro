@@ -62,8 +62,9 @@ print(sample_distribution(qc, shots=4096, seed=42))
 | M2 - 7 Kübit | tamam | n kübit destekli devre + dağılım örnekleme |
 | M3 - Doğrulama | kısmen | Bağımsız doğrulama testleri tamam (23). Qiskit-Statevector karşılaştırması laptop'ta: `pip install qiskit && python docs/qiskit_compare.py` |
 | M3b - Gerçek Rastgelelik | tamam | Lab rastgelelik motoruna gerçek kuantum kaynağı: ANU QRNG (vakum dalgalanması) → NIST Beacon → Web Crypto düşüş zinciri; canlı sitede seçilebilir |
-| M4 - Lansman | tamam | v1.0.0 sürüm etiketi + `docs/RELEASE_v1.0.0.md` (GitHub release'ini oluşturma kullanıcıda) |
+| M4 - Lansman | tamam | v1.0.0 sürüm etiketi + `docs/RELEASE_v1.0.0.md` |
 | M5 - Topluluk | kısmen | CONTRIBUTING.md, issue şablonları, sitede geri bildirim linki, TÜBİTAK 2204-B taslağı (`docs/TUBITAK_2204B_taslak.md`) — resmî başvuru kullanıcıda |
+| v1.1 - Araç seti genişletme | tamam | 8. araç: Kuantum Işınlanma; ANU proxy (Vercel serverless, hız limiti çözümü); ki-kare rastgelelik testi; TR/EN dil desteği; PWA/çevrimdışı; motor: RY + CZ kapıları (20 JS test) |
 
 ## Lisans
 

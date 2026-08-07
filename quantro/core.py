@@ -101,6 +101,11 @@ class QuantumCircuit:
     def z(self, q: int) -> "QuantumCircuit":
         return self.apply(Z, [q])
 
+    def ry(self, theta: float, q: int) -> "QuantumCircuit":
+        """Y ekseni etrafında dönme: RY(θ) = [[cos θ/2, -sin θ/2],[sin θ/2, cos θ/2]]."""
+        c0, s0 = np.cos(theta / 2), np.sin(theta / 2)
+        return self.apply(np.array([[c0, -s0], [s0, c0]], dtype=complex), [q])
+
     def cx(self, control: int, target: int) -> "QuantumCircuit":
         """CNOT: kontrol 1 ise hedef kübiti çevir."""
         if control == target:
@@ -110,6 +115,14 @@ class QuantumCircuit:
         gate[1, 1] = 1
         gate[2, 3] = 1
         gate[3, 2] = 1
+        return self.apply(gate, [control, target])
+
+    def cz(self, control: int, target: int) -> "QuantumCircuit":
+        """CZ: kontrol 1 ise hedef kübitin işaretini (fazını) çevir."""
+        if control == target:
+            raise ValueError("Kontrol ve hedef aynı olamaz")
+        gate = np.eye(4, dtype=complex)
+        gate[3, 3] = -1
         return self.apply(gate, [control, target])
 
     def probabilities(self) -> np.ndarray:
